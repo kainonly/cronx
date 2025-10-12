@@ -15,8 +15,13 @@ import (
 // Injectors from wire.go:
 
 func NewAPI(values *common.Values) (*api.API, error) {
+	scheduler, err := UseScheduler()
+	if err != nil {
+		return nil, err
+	}
 	inject := &common.Inject{
-		V: values,
+		V:         values,
+		Scheduler: scheduler,
 	}
 	hertz, err := UseHertz(values)
 	if err != nil {
