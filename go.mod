@@ -1,4 +1,4 @@
-module github.com/kainonly/scheduler
+module github.com/kainonly/cronx
 
 go 1.24.0
 

@@ -1,7 +1,7 @@
 package index
 
 import (
-	"github.com/kainonly/scheduler/common"
+	"github.com/kainonly/cronx/common"
 
 	"github.com/google/wire"
 )

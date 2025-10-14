@@ -7,9 +7,9 @@
 package bootstrap
 
 import (
-	"github.com/kainonly/scheduler/api"
-	"github.com/kainonly/scheduler/api/index"
-	"github.com/kainonly/scheduler/common"
+	"github.com/kainonly/cronx/api"
+	"github.com/kainonly/cronx/api/index"
+	"github.com/kainonly/cronx/common"
 )
 
 // Injectors from wire.go:
