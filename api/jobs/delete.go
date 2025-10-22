@@ -9,8 +9,8 @@ import (
 )
 
 type DeleteDto struct {
-	Key  string    `json:"key" vd:"required"`
-	UUID uuid.UUID `json:"uuid" vd:"required"`
+	SchedulerID string `json:"schedule_id" vd:"required,uuid4"`
+	ID          string `json:"uuid" vd:"required,uuid4"`
 }
 
 func (x *Controller) Delete(ctx context.Context, c *app.RequestContext) {
@@ -29,8 +29,10 @@ func (x *Controller) Delete(ctx context.Context, c *app.RequestContext) {
 }
 
 func (x *Service) Delete(ctx context.Context, dto DeleteDto) (err error) {
-	if !x.Cron.Has(dto.Key) {
+	if !x.Cron.Has(dto.SchedulerID) {
 		return
 	}
-	return x.Cron.Get(dto.Key).RemoveJob(dto.UUID)
+
+	jobID, _ := uuid.FromBytes([]byte(dto.ID))
+	return x.Cron.Get(dto.SchedulerID).RemoveJob(jobID)
 }
