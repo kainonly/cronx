@@ -6,20 +6,15 @@ import (
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/go-co-op/gocron/v2"
 	"github.com/google/uuid"
+	"github.com/kainonly/cronx/model"
 	"github.com/kainonly/go/help"
+	"gorm.io/gorm"
 )
 
 type CreateDto struct {
-	Key      string            `json:"key" vd:"required"`
-	UUID     uuid.UUID         `json:"uuid" vd:"required"`
-	Crontab  string            `json:"crontab" vd:"required"`
-	Method   string            `json:"method" vd:"required"`
-	URL      string            `json:"url" vd:"required"`
-	Headers  map[string]string `json:"headers"`
-	Query    map[string]string `json:"query"`
-	Body     string            `json:"body"`
-	Username string            `json:"username"`
-	Password string            `json:"password"`
+	SchedulerID string           `json:"schedule_id" vd:"required,uuid4"`
+	Crontab     string           `json:"crontab" vd:"required"`
+	Schema      *model.JobSchema `json:"schema" vd:"required,dive"`
 }
 
 func (x *Controller) Create(ctx context.Context, c *app.RequestContext) {
@@ -38,16 +33,35 @@ func (x *Controller) Create(ctx context.Context, c *app.RequestContext) {
 }
 
 func (x *Service) Create(ctx context.Context, dto CreateDto) (err error) {
-	if !x.Cron.Has(dto.Key) {
+	if err = x.SchedulersX.CheckSchedulerExists(ctx, dto.SchedulerID); err != nil {
 		return
 	}
-	if _, err = x.Cron.Get(dto.Key).NewJob(
-		gocron.CronJob(dto.Crontab, true),
-		gocron.NewTask(x.Run, dto),
-		gocron.WithIdentifier(dto.UUID),
-	); err != nil {
+	if !x.Cron.Has(dto.SchedulerID) {
 		return
 	}
 
-	return
+	return x.Db.Transaction(func(tx *gorm.DB) (errX error) {
+		jobID := uuid.New()
+		data := model.Job{
+			ID:          jobID.String(),
+			SchedulerID: dto.SchedulerID,
+			Crontab:     dto.Crontab,
+			Schema:      dto.Schema,
+		}
+
+		if errX = tx.WithContext(ctx).
+			Create(&data).Error; errX != nil {
+			return
+		}
+
+		if _, err = x.Cron.Get(dto.SchedulerID).NewJob(
+			gocron.CronJob(dto.Crontab, true),
+			gocron.NewTask(x.Run, dto),
+			gocron.WithIdentifier(jobID),
+		); err != nil {
+			return
+		}
+
+		return
+	})
 }

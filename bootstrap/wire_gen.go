@@ -38,15 +38,16 @@ func NewAPI(values *common.Values) (*api.API, error) {
 		V:      values,
 		IndexX: service,
 	}
-	jobsService := &jobs.Service{
+	schedulersService := &schedulers.Service{
 		Inject: inject,
+	}
+	jobsService := &jobs.Service{
+		Inject:      inject,
+		SchedulersX: schedulersService,
 	}
 	jobsController := &jobs.Controller{
 		V:     values,
 		JobsX: jobsService,
-	}
-	schedulersService := &schedulers.Service{
-		Inject: inject,
 	}
 	schedulersController := &schedulers.Controller{
 		V:           values,

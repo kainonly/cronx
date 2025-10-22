@@ -4,11 +4,13 @@ import (
 	"context"
 
 	"github.com/cloudwego/hertz/pkg/app"
+	"github.com/kainonly/cronx/model"
 	"github.com/kainonly/go/help"
+	"gorm.io/gorm"
 )
 
 type DeleteDto struct {
-	Key string `json:"key" vd:"required"`
+	ID string `json:"id" vd:"required,uuid4"`
 }
 
 func (x *Controller) Delete(ctx context.Context, c *app.RequestContext) {
@@ -27,8 +29,20 @@ func (x *Controller) Delete(ctx context.Context, c *app.RequestContext) {
 }
 
 func (x *Service) Delete(ctx context.Context, dto DeleteDto) (err error) {
-	if !x.Cron.Has(dto.Key) {
+	if err = x.CheckSchedulerExists(ctx, dto.ID); err != nil {
 		return
 	}
-	return x.Cron.Remove(dto.Key)
+
+	return x.Db.Transaction(func(tx *gorm.DB) (errX error) {
+		if errX = tx.Model(model.Scheduler{}).WithContext(ctx).
+			Delete(dto.ID).Error; errX != nil {
+			return
+		}
+
+		if !x.Cron.Has(dto.ID) {
+			return
+		}
+		return x.Cron.Remove(dto.ID)
+	})
+
 }
