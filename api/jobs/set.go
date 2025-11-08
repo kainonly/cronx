@@ -54,7 +54,8 @@ func (x *Service) SetRunner(key string, job *common.Job) (err error) {
 
 func (x *Service) Set(ctx context.Context, dto SetDto) error {
 	return x.Db.Update(func(txn *badger.Txn) (err error) {
-		if _, err = x.StorageX.GetValue(txn, dto.SchedulerKey); err != nil {
+		var data common.Scheduler
+		if data, err = x.StorageX.Get(txn, dto.SchedulerKey); err != nil {
 			return
 		}
 
@@ -62,7 +63,7 @@ func (x *Service) Set(ctx context.Context, dto SetDto) error {
 			return
 		}
 
-		// TODO: 合并配置再更新本地存储...
-		return
+		data.Jobs[dto.Identifier] = dto.Job
+		return x.StorageX.Set(txn, dto.SchedulerKey, data)
 	})
 }

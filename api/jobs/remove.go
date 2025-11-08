@@ -7,6 +7,7 @@ import (
 	"github.com/dgraph-io/badger/v4"
 	"github.com/go-co-op/gocron/v2"
 	"github.com/google/uuid"
+	"github.com/kainonly/cronx/common"
 	"github.com/kainonly/go/help"
 )
 
@@ -32,7 +33,8 @@ func (x *Controller) Remove(ctx context.Context, c *app.RequestContext) {
 
 func (x *Service) Delete(ctx context.Context, dto RemoveDto) error {
 	return x.Db.Update(func(txn *badger.Txn) (err error) {
-		if _, err = x.StorageX.GetValue(txn, dto.SchedulerKey); err != nil {
+		var data common.Scheduler
+		if data, err = x.StorageX.Get(txn, dto.SchedulerKey); err != nil {
 			return
 		}
 
@@ -50,7 +52,7 @@ func (x *Service) Delete(ctx context.Context, dto RemoveDto) error {
 			return
 		}
 
-		// TODO: 合并配置再更新本地存储...
-		return
+		delete(data.Jobs, dto.Identifier)
+		return x.StorageX.Set(txn, dto.SchedulerKey, data)
 	})
 }

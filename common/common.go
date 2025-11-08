@@ -12,8 +12,8 @@ type Inject struct {
 }
 
 var (
-	ErrConfigNotExists  = help.E(0, `The key does not exist in the schedule config`)
-	ErrStorageNotExists = help.E(0, `The key does not exist in the storage.`)
+	ErrNotExists       = help.E(0, `The key does not exist in the process`)
+	ErrConfigNotExists = help.E(0, `The key does not exist in the config.`)
 )
 
 type Scheduler struct {
