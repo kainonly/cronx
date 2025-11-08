@@ -7,23 +7,22 @@ import (
 	"github.com/dgraph-io/badger/v4"
 	"github.com/go-co-op/gocron/v2"
 	"github.com/google/uuid"
-	"github.com/kainonly/cronx/common"
 	"github.com/kainonly/go/help"
 )
 
-type CreateDto struct {
-	SchedulerKey string `json:"schedule_key" vd:"required,uuid4"`
-	*common.Job
+type RemoveDto struct {
+	SchedulerKey string `json:"schedule_key" vd:"uuid4"`
+	Identifier   string `json:"identifier" vd:"uuid4"`
 }
 
-func (x *Controller) Create(ctx context.Context, c *app.RequestContext) {
-	var dto CreateDto
+func (x *Controller) Remove(ctx context.Context, c *app.RequestContext) {
+	var dto RemoveDto
 	if err := c.BindAndValidate(&dto); err != nil {
 		c.Error(err)
 		return
 	}
 
-	if err := x.JobsX.Create(ctx, dto); err != nil {
+	if err := x.JobsX.Delete(ctx, dto); err != nil {
 		c.Error(err)
 		return
 	}
@@ -31,7 +30,7 @@ func (x *Controller) Create(ctx context.Context, c *app.RequestContext) {
 	c.JSON(200, help.Ok())
 }
 
-func (x *Service) Create(ctx context.Context, dto CreateDto) error {
+func (x *Service) Delete(ctx context.Context, dto RemoveDto) error {
 	return x.Db.Update(func(txn *badger.Txn) (err error) {
 		if _, err = x.StorageX.GetValue(txn, dto.SchedulerKey); err != nil {
 			return
@@ -47,11 +46,7 @@ func (x *Service) Create(ctx context.Context, dto CreateDto) error {
 			return
 		}
 
-		if _, err = scheduler.NewJob(
-			gocron.CronJob(dto.Crontab, true),
-			gocron.NewTask(x.Run, dto),
-			gocron.WithIdentifier(identifier),
-		); err != nil {
+		if err = scheduler.RemoveJob(identifier); err != nil {
 			return
 		}
 

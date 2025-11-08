@@ -5,7 +5,6 @@ import (
 
 	"github.com/bytedance/sonic"
 	"github.com/imroc/req/v3"
-	"github.com/kainonly/cronx/api/schedulers"
 	"github.com/kainonly/cronx/api/storage"
 	"github.com/kainonly/cronx/common"
 
@@ -26,8 +25,7 @@ type Controller struct {
 type Service struct {
 	*common.Inject
 
-	SchedulersX *schedulers.Service
-	StorageX    *storage.Service
+	StorageX *storage.Service
 }
 
 type M = map[string]any
