@@ -4,13 +4,12 @@ import (
 	"context"
 
 	"github.com/cloudwego/hertz/pkg/app"
-	"github.com/kainonly/cronx/model"
+	"github.com/dgraph-io/badger/v4"
 	"github.com/kainonly/go/help"
-	"gorm.io/gorm"
 )
 
 type DeleteDto struct {
-	ID string `json:"id" vd:"required,uuid4"`
+	Key string `path:"key" vd:"uuid4"`
 }
 
 func (x *Controller) Delete(ctx context.Context, c *app.RequestContext) {
@@ -28,20 +27,20 @@ func (x *Controller) Delete(ctx context.Context, c *app.RequestContext) {
 	c.JSON(200, help.Ok())
 }
 
-func (x *Service) Delete(ctx context.Context, dto DeleteDto) (err error) {
-	if err = x.CheckSchedulerExists(ctx, dto.ID); err != nil {
-		return
-	}
+func (x *Service) Delete(ctx context.Context, dto DeleteDto) error {
+	return x.Db.Update(func(txn *badger.Txn) (err error) {
+		if _, err = x.StorageX.GetValue(txn, dto.Key); err != nil {
+			return
+		}
 
-	return x.Db.Transaction(func(tx *gorm.DB) (errX error) {
-		if errX = tx.Delete(&model.Scheduler{ID: dto.ID}).
-			WithContext(ctx).Error; errX != nil {
+		if _, err = x.Cron.Get(dto.Key); err != nil {
 			return
 		}
-		if !x.Cron.Has(dto.ID) {
+
+		if err = x.Cron.Remove(dto.Key); err != nil {
 			return
 		}
-		return x.Cron.Remove(dto.ID)
+
+		return x.StorageX.Remove(txn, dto.Key)
 	})
-
 }

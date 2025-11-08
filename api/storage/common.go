@@ -1,8 +1,7 @@
-package schedulers
+package storage
 
 import (
 	"github.com/google/wire"
-	"github.com/kainonly/cronx/api/storage"
 	"github.com/kainonly/cronx/common"
 )
 
@@ -14,13 +13,11 @@ var Provides = wire.NewSet(
 type Controller struct {
 	V *common.Values
 
-	SchedulersX *Service
+	StorageX *Service
 }
 
 type Service struct {
 	*common.Inject
-
-	StorageX *storage.Service
 }
 
 type M = map[string]any
