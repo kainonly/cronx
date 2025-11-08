@@ -37,8 +37,10 @@ func (x *Service) Set(ctx context.Context, dto SetDto) error {
 		if scheduler, err = x.Cron.Get(dto.Key); err != nil && !errors.Is(err, common.ErrNotExists) {
 			return
 		}
-		if err = scheduler.Shutdown(); err != nil {
-			return
+		if scheduler != nil {
+			if err = scheduler.Shutdown(); err != nil {
+				return
+			}
 		}
 
 		var tz *time.Location
@@ -50,13 +52,17 @@ func (x *Service) Set(ctx context.Context, dto SetDto) error {
 			return
 		}
 
+		x.Cron.Store(dto.Key, scheduler)
 		for _, job := range dto.Jobs {
-			if err = x.JobsX.SetRunner(dto.Key, job); err != nil {
+			if err = x.JobsX.SetRunner(dto.Key, *job); err != nil {
 				return
 			}
 		}
 
-		x.Cron.Store(dto.Key, scheduler)
+		if *dto.Status {
+			scheduler.Start()
+		}
+
 		return x.StorageX.Set(txn, dto.Key, *dto.Scheduler)
 	})
 }

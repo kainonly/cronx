@@ -33,12 +33,13 @@ func (x *Service) Start(ctx context.Context, dto StartDto) error {
 		if _, err = x.StorageX.Get(txn, dto.Key); err != nil {
 			return
 		}
-		var s gocron.Scheduler
-		if s, err = x.Cron.Get(dto.Key); err != nil {
+
+		var scheduler gocron.Scheduler
+		if scheduler, err = x.Cron.Get(dto.Key); err != nil {
 			return
 		}
 
-		s.Start()
+		scheduler.Start()
 		return
 	})
 }

@@ -13,7 +13,7 @@ import (
 
 type RemoveDto struct {
 	SchedulerKey string `json:"schedule_key" vd:"uuid4"`
-	Identifier   string `json:"identifier" vd:"uuid4"`
+	Id           string `json:"id" vd:"uuid4"`
 }
 
 func (x *Controller) Remove(ctx context.Context, c *app.RequestContext) {
@@ -38,8 +38,8 @@ func (x *Service) Delete(ctx context.Context, dto RemoveDto) error {
 			return
 		}
 
-		var identifier uuid.UUID
-		if identifier, err = uuid.FromBytes([]byte(dto.Identifier)); err != nil {
+		var id uuid.UUID
+		if id, err = uuid.Parse(dto.Id); err != nil {
 			return
 		}
 
@@ -48,11 +48,11 @@ func (x *Service) Delete(ctx context.Context, dto RemoveDto) error {
 			return
 		}
 
-		if err = scheduler.RemoveJob(identifier); err != nil {
+		if err = scheduler.RemoveJob(id); err != nil {
 			return
 		}
 
-		delete(data.Jobs, dto.Identifier)
+		delete(data.Jobs, dto.Id)
 		return x.StorageX.Set(txn, dto.SchedulerKey, data)
 	})
 }
