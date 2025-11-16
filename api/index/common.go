@@ -1,9 +1,8 @@
 package index
 
 import (
-	"github.com/kainonly/cronx/common"
-
 	"github.com/google/wire"
+	"github.com/kainonly/cronx/common"
 )
 
 var Provides = wire.NewSet(

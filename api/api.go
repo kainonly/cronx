@@ -8,6 +8,7 @@ import (
 	"github.com/kainonly/cronx/api/schedulers"
 	"github.com/kainonly/cronx/api/storage"
 	"github.com/kainonly/cronx/common"
+	"github.com/kainonly/go/passport"
 
 	"github.com/cloudwego/hertz/pkg/app/server"
 	"github.com/google/wire"
@@ -24,6 +25,7 @@ type API struct {
 	*common.Inject
 
 	Hertz      *server.Hertz
+	Passport   *passport.Passport
 	Index      *index.Controller
 	IndexX     *index.Service
 	Jobs       *jobs.Controller
@@ -32,6 +34,8 @@ type API struct {
 }
 
 func (x *API) Initialize(ctx context.Context) (h *server.Hertz, err error) {
+	x.Hertz.Use(x.Auth())
+
 	x.Hertz.GET("", x.Index.Ping)
 
 	_jobs := x.Hertz.Group("jobs")
