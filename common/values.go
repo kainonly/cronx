@@ -2,8 +2,9 @@ package common
 
 type Values struct {
 	Address  string   `yaml:"address"`
+	Node     string   `yaml:"node"`
 	Key      string   `yaml:"key"`
-	Domain   string   `yaml:"domain"`
+	Origins  []string `yaml:"origins"`
 	Database Database `yaml:"database"`
 }
 
