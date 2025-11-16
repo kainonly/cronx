@@ -3,10 +3,10 @@ package api
 import (
 	"context"
 
+	"github.com/kainonly/cronx/api/configs"
 	"github.com/kainonly/cronx/api/index"
 	"github.com/kainonly/cronx/api/jobs"
 	"github.com/kainonly/cronx/api/schedulers"
-	"github.com/kainonly/cronx/api/storage"
 	"github.com/kainonly/cronx/common"
 	"github.com/kainonly/go/passport"
 
@@ -18,7 +18,7 @@ var Provides = wire.NewSet(
 	index.Provides,
 	jobs.Provides,
 	schedulers.Provides,
-	storage.Provides,
+	configs.Provides,
 )
 
 type API struct {
@@ -30,7 +30,7 @@ type API struct {
 	IndexX     *index.Service
 	Jobs       *jobs.Controller
 	Schedulers *schedulers.Controller
-	Storage    *storage.Controller
+	Configs    *configs.Controller
 }
 
 func (x *API) Initialize(ctx context.Context) (h *server.Hertz, err error) {
@@ -45,14 +45,15 @@ func (x *API) Initialize(ctx context.Context) (h *server.Hertz, err error) {
 	}
 	_schedulers := x.Hertz.Group("schedulers")
 	{
+		_schedulers.GET(``, x.Schedulers.List)
 		_schedulers.POST(`set`, x.Schedulers.Set)
 		_schedulers.POST(`start`, x.Schedulers.Start)
 		_schedulers.POST(`stop`, x.Schedulers.Stop)
 		_schedulers.POST(`remove`, x.Schedulers.Remove)
 	}
-	_storage := x.Hertz.Group("storage")
+	_configs := x.Hertz.Group("configs")
 	{
-		_storage.GET(``, x.Storage.List)
+		_configs.GET(``, x.Configs.List)
 	}
 	return x.Hertz, nil
 }

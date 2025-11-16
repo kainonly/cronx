@@ -1,4 +1,4 @@
-package storage
+package configs
 
 import (
 	"github.com/google/wire"
@@ -13,7 +13,7 @@ var Provides = wire.NewSet(
 type Controller struct {
 	V *common.Values
 
-	StorageX *Service
+	ConfigsX *Service
 }
 
 type Service struct {

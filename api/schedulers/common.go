@@ -2,8 +2,8 @@ package schedulers
 
 import (
 	"github.com/google/wire"
+	"github.com/kainonly/cronx/api/configs"
 	"github.com/kainonly/cronx/api/jobs"
-	"github.com/kainonly/cronx/api/storage"
 	"github.com/kainonly/cronx/common"
 )
 
@@ -21,7 +21,7 @@ type Controller struct {
 type Service struct {
 	*common.Inject
 
-	StorageX *storage.Service
+	ConfigsX *configs.Service
 	JobsX    *jobs.Service
 }
 

@@ -8,10 +8,10 @@ package bootstrap
 
 import (
 	"github.com/kainonly/cronx/api"
+	"github.com/kainonly/cronx/api/configs"
 	"github.com/kainonly/cronx/api/index"
 	"github.com/kainonly/cronx/api/jobs"
 	"github.com/kainonly/cronx/api/schedulers"
-	"github.com/kainonly/cronx/api/storage"
 	"github.com/kainonly/cronx/common"
 )
 
@@ -40,12 +40,12 @@ func NewAPI(values *common.Values) (*api.API, error) {
 		V:      values,
 		IndexX: service,
 	}
-	storageService := &storage.Service{
+	configsService := &configs.Service{
 		Inject: inject,
 	}
 	jobsService := &jobs.Service{
 		Inject:   inject,
-		StorageX: storageService,
+		ConfigsX: configsService,
 	}
 	jobsController := &jobs.Controller{
 		V:     values,
@@ -53,16 +53,16 @@ func NewAPI(values *common.Values) (*api.API, error) {
 	}
 	schedulersService := &schedulers.Service{
 		Inject:   inject,
-		StorageX: storageService,
+		ConfigsX: configsService,
 		JobsX:    jobsService,
 	}
 	schedulersController := &schedulers.Controller{
 		V:           values,
 		SchedulersX: schedulersService,
 	}
-	storageController := &storage.Controller{
+	configsController := &configs.Controller{
 		V:        values,
-		StorageX: storageService,
+		ConfigsX: configsService,
 	}
 	apiAPI := &api.API{
 		Inject:     inject,
@@ -72,7 +72,7 @@ func NewAPI(values *common.Values) (*api.API, error) {
 		IndexX:     service,
 		Jobs:       jobsController,
 		Schedulers: schedulersController,
-		Storage:    storageController,
+		Configs:    configsController,
 	}
 	return apiAPI, nil
 }
