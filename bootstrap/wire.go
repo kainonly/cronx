@@ -15,6 +15,7 @@ func NewAPI(values *common.Values) (*api.API, error) {
 		wire.Struct(new(api.API), "*"),
 		wire.Struct(new(common.Inject), "*"),
 		UseBadger,
+		UseVictorialogs,
 		UsePassport,
 		UseCronx,
 		UseHertz,
