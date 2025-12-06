@@ -3,7 +3,6 @@ package jobs
 import (
 	"time"
 
-	"github.com/kainonly/cronx/api/configs"
 	"github.com/kainonly/cronx/common"
 	"resty.dev/v3"
 
@@ -23,8 +22,6 @@ type Controller struct {
 
 type Service struct {
 	*common.Inject
-
-	ConfigsX *configs.Service
 }
 
 type M = map[string]any

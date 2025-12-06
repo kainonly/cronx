@@ -1,6 +1,7 @@
 package bootstrap
 
 import (
+	"database/sql"
 	"os"
 	"time"
 
@@ -13,9 +14,9 @@ import (
 	"github.com/kainonly/go/help"
 	"github.com/kainonly/go/passport"
 	"gopkg.in/yaml.v3"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 	"resty.dev/v3"
-
-	badger "github.com/dgraph-io/badger/v4"
 )
 
 func LoadStaticValues(path string) (v *common.Values, err error) {
@@ -30,10 +31,17 @@ func LoadStaticValues(path string) (v *common.Values, err error) {
 	return
 }
 
-func UseBadger(v *common.Values) (db *badger.DB, err error) {
-	if db, err = badger.Open(badger.DefaultOptions(v.Database.Path)); err != nil {
-		panic(err)
+func UseGorm(v *common.Values) (orm *gorm.DB, err error) {
+	if orm, err = gorm.Open(sqlite.Open(``), &gorm.Config{}); err != nil {
+		return
 	}
+	var db *sql.DB
+	if db, err = orm.DB(); err != nil {
+		return
+	}
+	db.SetMaxIdleConns(10)
+	db.SetMaxOpenConns(100)
+	db.SetConnMaxLifetime(time.Hour)
 	return
 }
 
